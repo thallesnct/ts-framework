@@ -1,6 +1,7 @@
-import { Eventing } from './Eventing';
-import { Sync } from './Sync';
+import { Model } from './Model';
 import { Attributes } from './Attributes';
+import { ApiSync } from './ApiSync';
+import { Eventing } from './Eventing';
 
 export interface UserProps {
   id?: number;
@@ -10,12 +11,16 @@ export interface UserProps {
 
 const rootUrl = 'http://localhost:3000/users';
 
-export class User {
-  public events: Eventing = new Eventing();
-  public sync: Sync<UserProps> = new Sync<UserProps>(rootUrl);
-  public attributes: Attributes<UserProps>;
+export class User extends Model<UserProps> {
+  static build(attrs: UserProps): User {
+    return new User(
+      new Attributes<UserProps>(attrs),
+      new Eventing(),
+      new ApiSync<UserProps>(rootUrl)
+    );
+  }
 
-  constructor(attrs: UserProps) {
-    this.attributes = new Attributes<UserProps>(attrs);
+  isAdmin(): boolean {
+    return this.get('id') === 1;
   }
 }
